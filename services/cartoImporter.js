@@ -14,7 +14,8 @@ const queryBuilder = require('../helpers/cartoQueryBuilder')
 function createSQLCopyFile (items, userId) {
   // this is where we'll create the csv file needed for COPY operation
   const geocodedCsvString = Papa.unparse(items)
-  const fileOutPath = path.join(os.tmpdir(), 'geometric_' + userId + '_geocoded.csv')
+  console.log(geocodedCsvString)
+  const fileOutPath = path.join(os.homedir(), 'geometric_' + userId + '_geocoded.csv')
   fs.writeFileSync(fileOutPath, geocodedCsvString)
   return fileOutPath
 }
