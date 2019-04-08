@@ -25,10 +25,10 @@ function createSQLCopyFile (items, userId) {
  * https://carto.com/developers/sql-api/guides/copy-queries/
  * @param {string} createTableQuery the query to use
  */
-async function executeCopy (createTableQuery, copyTableQuery, filename) {
+async function executeCopy (copyTableQuery, createTableQuery, filename) {
   // this function will call the carto sql api to execute the COPY operation
   const cartoSql = new CartoSqlApi()
-  const cartoRes = await cartoSql.queryCarto(createTableQuery, copyTableQuery, filename)
+  const cartoRes = await cartoSql.copyQueryCarto(copyTableQuery, createTableQuery, filename)
   return cartoRes
 }
 /**
@@ -36,8 +36,12 @@ async function executeCopy (createTableQuery, copyTableQuery, filename) {
  * @param {string} query
  * @returns {Array} array of customer ids
  */
-function getExistingItems (userId, idColumn) {
-  const existingItemsQuery = queryBuilder.getExistingItemsQuery(userId)
+async function getExistingItems (userName, idColumn) {
+  const cartoSql = new CartoSqlApi()
+  const existingItemsQuery = queryBuilder.getExistingItemsQuery(userName, idColumn)
+  const existingItems = await cartoSql.selectExisting(existingItemsQuery)
+  const existingArr = existingItems.map(item => item[idColumn])
+  return existingArr
   // ...
 }
 
@@ -58,11 +62,16 @@ exports.importIntoCarto = async function (items, userId, isFirstImport, idColumn
     return result
     // return ...
   } else {
-    const existingIds = getExistingItems(userId, idColumn)
+    const existingIds = await getExistingItems(userName, idColumn)
     const updatedItems = items.filter(item => existingIds.includes(item[idColumn]))
     const newItems = items.filter(item => !existingIds.includes(item[idColumn]))
-    // const insertQuery = queryBuilder.buildInsertQuery(newItems)
-    // const updateQuery = queryBuilder.buildUpdateQuery(updateItems)
+    console.log({ updatedItems })
+    console.log({ newItems })
+    // ^^ everything above this line works
+    const insertQueries = updatedItems.map(item => queryBuilder.buildInsertQuery(item))
+    // TODO just insert per item OR bulk insert ^^^
+    const updateQueries = newItems.map(item => queryBuilder.buildUpdateQuery(item))
+    // TODO delete row and insert ^^^
     // todo: function to insert new Items
     // todo: function to update Items
     // todo : return

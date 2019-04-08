@@ -20,18 +20,22 @@ function createTableQuery (filePath, username) {
  * @param {string} userId
  * @returns {string} the sql query
  */
-function getExistingItemsQuery (userId) {
+function getExistingItemsQuery (userName, idColumn) {
   // here we'll construct a query to extract customer id's that we recieved from the most recent
   // shopify sync- given that the table already exists...
-
+  const tableName = `${userName}_import`
+  const selectQuery = `SELECT ${idColumn} FROM ${tableName}`
+  return selectQuery
 }
 
 function buildInsertQuery (newItems) {
   // here we'll construct a query to insert new rows into the existing table
+
 }
 
 function buildUpdateQuery (updateItems) {
   // here we'll construct a query to update row in the existing table
+
 }
 
 module.exports = {
